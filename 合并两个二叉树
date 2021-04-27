@@ -1,0 +1,159 @@
+#include<iostream>
+#include<vector>
+#include<queue>
+using namespace std;
+
+struct Flag
+{
+	int LFlag;        
+	int RFlag;        
+	int Weight;    
+	Flag(int lf,int rf,int w):LFlag(lf),RFlag(rf),Weight(w)
+	{    };
+};
+
+struct BiTreeNode
+{
+	int flag;
+	int weight;
+	BiTreeNode *lchild,*rchild;
+	BiTreeNode()
+	{
+        flag=0;
+        weight=0;
+        lchild=NULL;
+        rchild=NULL;
+    }
+};
+
+class BiTree
+{ 
+private:
+	BiTreeNode *root;
+	vector<Flag> treeData;
+	void CreatTree(BiTreeNode *&T,int flag)
+	{
+		T->flag=flag;           
+		T->weight=treeData[flag-1].Weight;        
+		if(treeData[flag-1].LFlag==0)
+		{            
+			T->lchild=NULL;         
+		}
+		else
+		{                
+			T->lchild=new BiTreeNode;       
+			CreatTree(T->lchild,treeData[flag-1].LFlag);    
+		}
+		if(treeData[flag-1].RFlag==0)
+		{
+			T->rchild=NULL;
+		}
+		else
+		{         
+			T->rchild=new BiTreeNode;    
+			CreatTree(T->rchild,treeData[flag-1].RFlag);   
+		}       
+	}
+	void levelOrder(BiTreeNode *T1)//层次遍历
+	{ 
+		queue<BiTreeNode*> tq;           
+		BiTreeNode *p=T1;         
+		if(p!=NULL)             
+			tq.push(p);         
+		while(!tq.empty())
+		{
+			p=tq.front();      
+			tq.pop();          
+			cout<<p->weight<<" ";    
+			if(p->lchild!=NULL)      
+				tq.push(p->lchild);           
+			if(p->rchild!=NULL)              
+				tq.push(p->rchild);  
+		}
+	}
+	friend void unite(BiTreeNode *&T1,BiTreeNode *&T2);   //声明友元函数      
+	friend void unite(BiTree *T1,BiTree *T2);   //声明友元函数
+public:
+	BiTree()
+	{          
+		root=NULL;     
+	}      
+	void CreatTree(vector<Flag> data)
+	{         
+		int len=data.size();   //向量大小       
+		for(int i=0;i<len;i++)
+		{          
+			treeData.push_back(data[i]);   //末未添加元素
+		}         
+		root=new BiTreeNode;      
+		CreatTree(root,1);      
+	}
+	void levelOrder()
+	{
+		levelOrder(root);
+	}
+}; 
+
+void unite(BiTreeNode *&T1,BiTreeNode *&T2)
+{    
+	if(T1&&T2)
+	{       
+		T1->weight=T1->weight+T2->weight;
+		unite(T1->lchild,T2->lchild);       
+		unite(T1->rchild,T2->rchild); 
+	}  
+	else if(!T1&&T2)
+	{      
+		T1=new BiTreeNode;  
+		T1->weight=T2->weight;      
+		unite(T1->lchild,T2->lchild);    
+		unite(T1->rchild,T2->rchild);   
+	}
+}
+
+void unite(BiTree *T1,BiTree *T2)
+{
+    unite(T1->root,T2->root);
+}
+
+int main()
+{
+    int n,m;
+	cout<<"* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *"<<"\n";
+	cout<<"*                  请输入两个二叉树的节点数:                      *"<<"\n";
+    cout<<"*                              ";
+	cin>>n>>m;
+    int a,b,c;
+    vector<Flag> flag;
+	vector<Flag> flag1;
+	cout<<"*                                                                 *\n";  
+	cout<<"*  注意：请按照左孩子序号，右孩子序号，权值的顺序输入这两棵树!    *"<<"\n";
+	cout<<"*                       若为空则序号输入为‘0’                   *"<<"\n";
+	cout<<"*                                                                 *\n";  
+	cout<<"*                            第一棵树为：                         *"<<"\n";
+	while(n--)
+	{     
+		cout<<"*                            ";
+		cin>>a>>b>>c;      
+		Flag d(a,b,c);       
+		flag.push_back(d); 
+	}    
+	cout<<"*                                                                 *\n";  
+	cout<<"*                            第二棵树为：                         *"<<"\n";
+	while(m--)
+	{     
+		cout<<"*                            ";
+		cin>>a>>b>>c;    
+		Flag d(a,b,c);  
+		flag1.push_back(d);  
+	}        
+	BiTree T;  
+	T.CreatTree(flag);  
+	BiTree T1;   
+	T1.CreatTree(flag1);   
+	unite(&T,&T1);  
+	cout<<"*                 合并后的新二叉树的层次遍历结果为：              *"<<"\n";
+	cout<<"*    ";
+	T.levelOrder();
+	cout<<"\n* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *";
+} 
